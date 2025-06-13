@@ -85,6 +85,7 @@ export interface Media {
  * ✅ New interface for categories collection
  */
 export interface Category {
+  [x: string]: any;
   id: string;
   name: string;
   createdAt: string;
