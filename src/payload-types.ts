@@ -85,9 +85,16 @@ export interface Media {
  * ✅ New interface for categories collection
  */
 export interface Category {
-  [x: string]: any;
   id: string;
   name: string;
+  slug: string;
+  color?: string | null;
+  parent?: (string | null);
+  subcategories?: {
+    docs?: (string | Category)[];
+    hasNextPage?: boolean;
+    totalDocs?:number;
+  };
   createdAt: string;
   updatedAt: string;
 }
