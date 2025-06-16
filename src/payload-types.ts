@@ -14,6 +14,7 @@ export interface Config {
     users: User;
     media: Media;
     categories: Category; // ✅ <-- Added
+    products: Product; // ✅ <-- Edited
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -98,6 +99,28 @@ export interface Category {
   };
   createdAt: string;
   updatedAt: string;
+}
+
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: string;
+  name: string;
+  description?: string | null;
+  price: number;
+  category: {
+    relationTo: 'categories';
+    value: string | Category;
+  };
+  image?: {
+    relationTo: 'media';
+    value: string | Media;
+  } | null;
+  refundPolicy: '30-day' | '14-day' | '7-day' | '3-day' | '1-day' | 'no-refunds';
+  updatedAt: string;
+  createdAt: string;
 }
 
 /**
