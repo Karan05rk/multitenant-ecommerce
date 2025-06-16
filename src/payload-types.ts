@@ -15,6 +15,7 @@ export interface Config {
     media: Media;
     categories: Category; // ✅ <-- Added
     products: Product; // ✅ <-- Edited
+    tags: Tag; // ✅ <- ADD THIS
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -122,6 +123,21 @@ export interface Product {
   updatedAt: string;
   createdAt: string;
 }
+
+/**
+ * ✅ New interface for tags collection
+ */
+export interface Tag {
+  id: string;
+  name: string;
+  products?: {
+    relationTo: 'products';
+    value: (string | Product)[];
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
 
 /**
  * This interface was referenced by `Config`'s JSON-Schema
