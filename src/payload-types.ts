@@ -16,6 +16,7 @@ export interface Config {
     categories: Category; // ✅ <-- Added
     products: Product; // ✅ <-- Edited
     tags: Tag; // ✅ <- ADD THIS
+    tenants: Tenant; // <- ADD THIS
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -63,6 +64,8 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
+  roles?: ("super-admin" | "user")[];
+  tenants?: { tenant: string | Tenant }[];
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -138,6 +141,22 @@ export interface Tag {
   updatedAt: string;
 }
 
+/**
+ * ✅ New interface for tenants collection
+ */
+export interface Tenant {
+  id: string;
+  name: string;
+  slug: string;
+  image?: {
+    relationTo: 'media';
+    value: string | Media;
+  } | null;
+  stripeAccountId: string;
+  stripeDetailsSubmitted?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 /**
  * This interface was referenced by `Config`'s JSON-Schema
