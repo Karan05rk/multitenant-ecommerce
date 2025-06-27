@@ -110,6 +110,7 @@ export interface Category {
  * via the `definition` "products".
  */
 export interface Product {
+  tenant: Tenant;
   id: string;
   name: string;
   description?: string | null;
