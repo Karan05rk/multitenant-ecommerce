@@ -35,14 +35,14 @@ export const Tenants: CollectionConfig = {
         type: "text",
         required: true,
         admin: {
-            readOnly: true,
+            // readOnly: true,
         },
     },
     {
         name: "stripeDetailsSubmitted",
         type: "checkbox",
         admin: {
-            readOnly: true,
+            // readOnly: true,
             description: "You cannot create products until you submit your Stripe details",
         },
     },
