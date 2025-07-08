@@ -9,6 +9,7 @@ import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init
 
 import { CheckoutMetadata, ProductMetadata } from "../types";
 import { PLATFORM_FEE_PERCENTAGE } from "@/constants";
+import { generateTenantURL } from "@/lib/utils";
 
 export const checkoutRouter = createTRPCRouter({
     verify: protectedProcedure
@@ -110,7 +111,7 @@ export const checkoutRouter = createTRPCRouter({
                     message: "Tenant not found",
                 })
             }
-            
+
             if (!tenant.stripeDetailsSubmitted) {
                 throw new TRPCError({
                     code: "BAD_REQUEST",
@@ -136,18 +137,20 @@ export const checkoutRouter = createTRPCRouter({
                     }
                 }));
 
-                const totalAmount = products.docs.reduce(
-                    (acc, item) => acc + item.price * 100,
-                    0
-                );
-                const platformFeeAmount = Math.round(
-                    totalAmount * (PLATFORM_FEE_PERCENTAGE / 100)
-                );
+            const totalAmount = products.docs.reduce(
+                (acc, item) => acc + item.price * 100,
+                0
+            );
+            const platformFeeAmount = Math.round(
+                totalAmount * (PLATFORM_FEE_PERCENTAGE / 100)
+            );
+
+            const domain = generateTenantURL(input.tenantSlug);
 
             const checkout = await stripe.checkout.sessions.create({
                 customer_email: ctx.session.user.email,
-                success_url: `${process.env.NEXT_PUBLIC_APP_URL}/tenants/${input.tenantSlug}/checkout?success=true`,
-                cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/tenants/${input.tenantSlug}/checkout?cancel=true`,
+                success_url: `${domain}/checkout?success=true`,
+                cancel_url: `${domain}/checkout?cancel=true`,
                 mode: "payment",
                 line_items: lineItems,
                 invoice_creation: {
@@ -171,48 +174,48 @@ export const checkoutRouter = createTRPCRouter({
         })
     ,
     getProducts: baseProcedure
-    .input(
-        z.object({
-            ids: z.array(z.string()),
+        .input(
+            z.object({
+                ids: z.array(z.string()),
+            }),
+        )
+        .query(async ({ ctx, input }) => {
+            const data = await ctx.db.find({
+                collection: "products",
+                depth: 2, // Populate "category" & "image"
+                where: {
+                    and: [
+                        {
+                            id: {
+                                in: input.ids,
+                            },
+                        },
+                        {
+                            isArchived: {
+                                not_equals: true,
+                            },
+                        },
+                    ],
+                },
+            });
+
+            if (data.totalDocs !== input.ids.length) {
+                throw new TRPCError({ code: "NOT_FOUND", message: "Products not found" });
+            }
+
+            const totalPrice = data.docs.reduce((acc, product) => {
+                const price = Number(product.price);
+                return acc + (isNaN(price) ? 0 : price);
+            }, 0);
+
+            return {
+                ...data,
+                totalPrice: totalPrice,
+                docs: data.docs.map((doc) => ({
+                    ...doc,
+                    image: doc.image as Media | null,
+                    tenant: doc.tenant as Tenant & { image: Media | null },
+                }))
+            }
         }),
-    )
-    .query(async ({ ctx, input }) => {
-        const data = await ctx.db.find({
-            collection: "products",
-            depth: 2, // Populate "category" & "image"
-            where: {
-                and: [
-                    {
-                        id: {
-                            in: input.ids,
-                        },
-                    },
-                    {
-                        isArchived: {
-                            not_equals: true,
-                        },
-                    },
-                ],
-            },
-        });
-
-        if (data.totalDocs !== input.ids.length) {
-            throw new TRPCError({ code: "NOT_FOUND", message: "Products not found" });
-        }
-
-        const totalPrice = data.docs.reduce((acc, product) => {
-            const price = Number(product.price);
-            return acc + (isNaN(price) ? 0 : price);
-        }, 0);
-
-        return {
-            ...data,
-            totalPrice: totalPrice,
-            docs: data.docs.map((doc) => ({
-                ...doc,
-                image: doc.image as Media | null,
-                tenant: doc.tenant as Tenant & { image: Media | null },
-            }))
-        }
-    }),
 });
