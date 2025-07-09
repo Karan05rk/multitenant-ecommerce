@@ -2,7 +2,7 @@ import z from "zod";
 import { TRPCError } from "@trpc/server";
 
 import { DEFAULT_LIMIT } from "@/constants";
-import { Category, Media, Tenant } from "@/payload-types";
+import { Media, Tenant } from "@/payload-types";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 
 export const libraryRouter = createTRPCRouter({

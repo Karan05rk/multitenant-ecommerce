@@ -3,7 +3,6 @@
 import { InboxIcon } from "lucide-react";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 
-import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { DEFAULT_LIMIT } from "@/constants";
 import { Button } from "@/components/ui/button";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 import { useTRPC } from "@/trpc/client";
 
